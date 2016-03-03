@@ -13,9 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.sql.*;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Properties;
+import java.util.*;
 
 /**
  *
@@ -57,26 +55,27 @@ public class DBNotebookRepo implements NotebookRepo {
     logger.info("Entered list call");
     List<NoteInfo> infos = new LinkedList<NoteInfo>();
 
-//    String query = "SELECT NOTEBOOK_ID FROM " + DB_SCHEMA + ".NOTEBOOKCONTENT ";
-//
-//
-//    try {
-//      PreparedStatement ps1 = con.prepareStatement(query);
-//      ResultSet result = ps1.executeQuery();
-//
-//      while (result.next()) {
-//        Note note = getNote(result.getString("NOTEBOOK_ID"));
-//        NoteInfo info = new NoteInfo(note);
-//        if (info != null) {
-//          infos.add(info);
-//        }
-//      }
-//
-//    } catch (SQLException sqle) {
-//      logger.error("EXIT: SQLException getConnection, Message:" +
-//              sqle.getMessage() + " - " + sqle.getErrorCode());
-//      sqle.printStackTrace();
-//    }
+    String query = "SELECT NOTEBOOK_ID FROM " + DB_SCHEMA + ".NOTEBOOKCONTENT ";
+
+
+    try {
+      PreparedStatement ps1 = con.prepareStatement(query);
+      ResultSet result = ps1.executeQuery();
+
+      while (result.next()) {
+       // Note note = getNote(result.getString("NOTEBOOK_ID"));
+        NoteInfo info = new NoteInfo(result.getString("NOTEBOOK_ID"),
+                "", new HashMap<String, Object>());
+        if (info != null) {
+          infos.add(info);
+        }
+      }
+
+    } catch (SQLException sqle) {
+      logger.error("EXIT: SQLException getConnection, Message:" +
+              sqle.getMessage() + " - " + sqle.getErrorCode());
+      sqle.printStackTrace();
+    }
 
     logger.info("left list call");
     return infos;
@@ -85,13 +84,14 @@ public class DBNotebookRepo implements NotebookRepo {
   @Override
   public Note get(String noteId) throws IOException {
 
-    logger.info("get list call");
+    logger.info("Entered get call " + noteId);
     return getNote(noteId);
 
   }
 
   private Note getNote (String noteId) {
 
+    logger.info("Entered getNote" + noteId);
     Note note = new Note();
 
     if (con == null) {
@@ -121,7 +121,7 @@ public class DBNotebookRepo implements NotebookRepo {
           p.setStatus(Job.Status.ABORT);
         }
       }
-
+      logger.info("left getNote");
     } catch (SQLException sqle) {
       logger.error("EXIT: SQLException getConnection, Message:" +
               sqle.getMessage() + " - " + sqle.getErrorCode());
