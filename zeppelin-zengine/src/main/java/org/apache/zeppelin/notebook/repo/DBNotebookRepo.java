@@ -57,26 +57,26 @@ public class DBNotebookRepo implements NotebookRepo {
     logger.info("Entered list call");
     List<NoteInfo> infos = new LinkedList<NoteInfo>();
 
-    String query = "SELECT NOTEBOOK_ID FROM " + DB_SCHEMA + ".NOTEBOOKCONTENT ";
-
-
-    try {
-      PreparedStatement ps1 = con.prepareStatement(query);
-      ResultSet result = ps1.executeQuery();
-
-      while (result.next()) {
-        Note note = getNote(result.getString("NOTEBOOK_ID"));
-        NoteInfo info = new NoteInfo(note);
-        if (info != null) {
-          infos.add(info);
-        }
-      }
-
-    } catch (SQLException sqle) {
-      logger.error("EXIT: SQLException getConnection, Message:" +
-              sqle.getMessage() + " - " + sqle.getErrorCode());
-      sqle.printStackTrace();
-    }
+//    String query = "SELECT NOTEBOOK_ID FROM " + DB_SCHEMA + ".NOTEBOOKCONTENT ";
+//
+//
+//    try {
+//      PreparedStatement ps1 = con.prepareStatement(query);
+//      ResultSet result = ps1.executeQuery();
+//
+//      while (result.next()) {
+//        Note note = getNote(result.getString("NOTEBOOK_ID"));
+//        NoteInfo info = new NoteInfo(note);
+//        if (info != null) {
+//          infos.add(info);
+//        }
+//      }
+//
+//    } catch (SQLException sqle) {
+//      logger.error("EXIT: SQLException getConnection, Message:" +
+//              sqle.getMessage() + " - " + sqle.getErrorCode());
+//      sqle.printStackTrace();
+//    }
 
     logger.info("left list call");
     return infos;
@@ -152,20 +152,25 @@ public class DBNotebookRepo implements NotebookRepo {
       ps = con.prepareStatement(checkQuery);
       ps.setString(1, note.getId());
       ResultSet rset =  ps.executeQuery();
+
       if (rset.next()) {
         ps = con.prepareStatement(updateQuery);
         ps.setString(1, json);
         ps.setString(2, note.getId());
+        logger.info(updateQuery);
         if (ps.executeUpdate() == 1) {
-          logger.info("update successfull");
+          logger.info("update successfully");
         }
 
       } else {
+
         ps = con.prepareStatement(insertQuery);
+        logger.info(insertQuery);
+
         ps.setString(1, note.getId());
         ps.setString(2, json);
         if (ps.executeUpdate() == 1) {
-          logger.info("save successfull");
+          logger.info("saved successfully");
         }
       }
 
@@ -191,7 +196,7 @@ public class DBNotebookRepo implements NotebookRepo {
       if (ps.executeUpdate() == 1) {
         logger.info("Notebook " + noteId + " deleted successfully");
       }
-      
+
     } catch (SQLException sqle) {
       logger.error("EXIT: SQLException getConnection, Message:" +
               sqle.getMessage() + " - " + sqle.getErrorCode());
