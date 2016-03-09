@@ -105,7 +105,7 @@ public class Notebook {
     quartzSched.start();
     CronJob.notebook = this;
 
-    //loadAllNotes();
+    loadAllNotes();
     if (this.notebookIndex != null) {
       long start = System.nanoTime();
       logger.info("Notebook indexing started...");
@@ -268,7 +268,7 @@ public class Notebook {
   }
 
   public Note getNote(String id) {
-    loadNoteFromRepo(id);
+    //loadNoteFromRepo(id);
     synchronized (notes) {
       return notes.get(id);
     }
