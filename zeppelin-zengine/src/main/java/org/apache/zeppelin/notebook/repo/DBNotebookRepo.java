@@ -37,6 +37,7 @@ public class DBNotebookRepo implements NotebookRepo {
       Properties connectionProps = new Properties();
       connectionProps.put("user", USERNAME);
       connectionProps.put("password", PASSWORD);
+      connectionProps.put("allowNextOnExhaustedResultSet", 1);
       con = DriverManager.getConnection(JDBCURL, connectionProps);
       logger.info("Connected to Database !!" + con.toString());
     }
