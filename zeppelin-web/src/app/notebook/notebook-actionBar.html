@@ -105,27 +105,40 @@ limitations under the License.
         <div class="btn btn-default btn-xs dropdown-toggle"
              type="button"
              data-toggle="dropdown"
-             ng-class="{ 'btn-info' : note.config.cron, 'btn-danger' : note.info.cron, 'btn-default' : !note.config.cron}"
+             ng-class="{ 'btn-info' : note.config.ngpCron, 'btn-danger' : note.info.cron, 'btn-default' : !note.config.ngpCron}"
              tooltip-placement="bottom" tooltip="Run scheduler">
-          <span class="fa fa-clock-o"></span> {{getCronOptionNameFromValue(note.config.cron)}}
+          <span class="fa fa-clock-o"></span> {{getCronOptionNameFromValue(note.config.ngpCron)}}
         </div>
         <ul class="dropdown-menu" role="menu" style="width:300px">
           <li>
             <div class="cron-preset-container">
               Run note with cron scheduler.
               Either choose from<br/>preset or write your own <a href="http://www.quartz-scheduler.org/documentation/quartz-1.x/tutorials/crontrigger" target=_blank>cron expression</a>.
+
+              <div>
+                <span>- Description</span>
+                <input type="text"
+                       ng-model="note.config.description"
+                       dropdown-input ng-model-options="{ debounce: 1000 }" />
+                <p ng-show="note.info.cron" class="text-danger cron-info">
+                  {{note.info.cron}}
+                </p>
+              </div>
+
+              <!--ng-click="setCronScheduler(cr.value, description)" -->
               <div>
                 <span>- Preset</span>
                 <a class="cron-preset" ng-repeat="cr in cronOption"
                    type="button"
-                   ng-click="setCronScheduler(cr.value)"
-                   dropdown-input ng-class="{ 'selected' : cr.value == note.config.cron}">{{cr.name}}</a>
+                   ng-click="setCronValue(cr.value)"
+                   dropdown-input ng-class="{ 'selected' : cr.value == note.config.ngpCron}">{{cr.name}}</a>
               </div>
+
+              <!--ng-change="setCronScheduler(note.config.ngpCron, description)" -->
               <div>
                 <span>- Cron expression</span>
                 <input type="text"
-                       ng-model="note.config.cron"
-                       ng-change="setCronScheduler(note.config.cron)"
+                       ng-model="note.config.ngpCron"
                        dropdown-input ng-model-options="{ debounce: 1000 }" />
                 <p ng-show="note.info.cron" class="text-danger cron-info">
                   {{note.info.cron}}
@@ -137,6 +150,7 @@ limitations under the License.
                        ng-model="note.config.releaseresource"
                        ng-click="setReleaseResource(note.config.releaseresource)">
               </div>
+              <button ng-click = "setCronScheduler(note.config.ngpCron, note.config.description)">Schedule</button>
             </div>
           </li>
         </ul>

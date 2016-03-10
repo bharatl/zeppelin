@@ -295,22 +295,31 @@ angular.module('zeppelinWebApp').controller('NotebookCtrl',
 //    $scope.setConfig();
 //  };
 
-   $scope.setCronScheduler = function(cronExpr) {
-      $scope.note.config.cron = cronExpr;
-      // Added: For redirecting to NGP Scheduler Microservice
-      console.log("Redirecting to NGP Scheduler Microservice")
-      var scheduleRequest = {
-       method: 'POST',
-       url: 'http://bdavm763.svl.ibm.com:12100/schedules/',
-       data: { artifactType: 'notebook', artifactID: $scope.note.id , scheduleExpr: cronExpr, description: "run every minute"}
-      }
-      $http(scheduleRequest).then(function successCallback(response) {
-                                      console.log("Successful response received")
-                                   }, function errorCallback(response) {
-                                      console.log("Error response received")
-                                   });
-      //$scope.setConfig();
+   $scope.setCronValue = function(cronExpr) {
+        $scope.note.config.ngpCron = cronExpr
     };
+     /** Set cron expression for this note **/
+     $scope.setCronScheduler = function(cronExpr, description) {
+       //$scope.note.config.cron = cronExpr;
+
+       $scope.note.config.ngpCron = cronExpr
+       $scope.note.config.description = description
+
+       // Added: For redirecting to NGP Scheduler Microservice
+       console.log("Redirecting to NGP Scheduler Microservice")
+       var scheduleRequest = {
+        method: 'POST',
+        url: 'http://169.53.146.140:12100/schedules/',
+        data: { artifactType: 'notebook', artifactID: $scope.note.id , scheduleExpr: cronExpr, description: description}
+       }
+
+       $http(scheduleRequest).then(function successCallback(response) {
+                                       console.log("Successful response received")
+                                    }, function errorCallback(response) {
+                                       console.log("Error response received")
+
+                                    });
+       };
 
   /** Set release resource for this note **/
   $scope.setReleaseResource = function(value) {
