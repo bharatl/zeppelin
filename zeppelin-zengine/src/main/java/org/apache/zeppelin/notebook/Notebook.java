@@ -268,6 +268,12 @@ public class Notebook {
   }
 
   public Note getNote(String id) {
+    synchronized (notes) {
+      return notes.get(id);
+    }
+  }
+
+  public Note getNoteFromDB(String id) {
     loadNoteFromRepo(id);
     synchronized (notes) {
       return notes.get(id);

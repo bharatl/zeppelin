@@ -394,7 +394,7 @@ public class NotebookServer extends WebSocketServlet implements
       return;
     }
 
-    Note note = notebook.getNote(noteId);
+    Note note = notebook.getNoteFromDB(noteId);
     if (note != null) {
       if (!note.isReader(userAndRoles)) {
         permissionError(conn, "read", userAndRoles, note.getReaders());

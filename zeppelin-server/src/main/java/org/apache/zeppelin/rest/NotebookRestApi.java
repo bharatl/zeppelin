@@ -203,7 +203,7 @@ public class NotebookRestApi {
   @GET
   @Path("{notebookId}")
   public Response getNotebook(@PathParam("notebookId") String notebookId) throws IOException {
-    Note note = notebook.getNote(notebookId);
+    Note note = notebook.getNoteFromDB(notebookId);
     if (note == null) {
       return new JsonResponse<>(Status.NOT_FOUND, "note not found.").build();
     }
