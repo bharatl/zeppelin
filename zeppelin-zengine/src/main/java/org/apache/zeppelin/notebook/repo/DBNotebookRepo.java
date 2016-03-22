@@ -28,6 +28,8 @@ public class DBNotebookRepo implements NotebookRepo {
   private String DRIVER = "COM.ibm.db2os390.sqlj.jdbc.DB2SQLJDriver";
   private String JDBCURL = "jdbc:db2://awh-yp-small02.services.dal.bluemix.net:50000/BLUDB";
 
+  private StringBuilder sb;
+
   private Connection con = null;
 
   public DBNotebookRepo(ZeppelinConfiguration conf) {
@@ -140,39 +142,26 @@ public class DBNotebookRepo implements NotebookRepo {
     Gson gson = gsonBuilder.create();
     String json = gson.toJson(note);
     PreparedStatement ps;
+    sb = new StringBuilder();
 
-    String checkQuery = "SELECT NOTEBOOK_ID FROM " + DB_SCHEMA +
-            ".NOTEBOOKCONTENT WHERE NOTEBOOK_ID = ?";
-
-    String insertQuery = "INSERT INTO " + DB_SCHEMA + ".NOTEBOOKCONTENT  VALUES (?,?)";
-
-    String updateQuery = "UPDATE " + DB_SCHEMA +
-            ".NOTEBOOKCONTENT SET NOTEBOOK_DATA = ? WHERE NOTEBOOK_ID = ?";
+    String mergeQuery = sb.append("MERGE INTO ")
+            .append(DB_SCHEMA)
+            .append(".NOTEBOOKCONTENT AS NBC USING ")
+            .append(" (VALUES (?,?)) AS NBC_TMP (NOTEBOOK_ID, NOTEBOOK_DATA) ON ")
+            .append(" NBC.NOTEBOOK_ID = NBC_TMP.NOTEBOOK_ID ")
+            .append(" WHEN MATCHED THEN ")
+            .append(" UPDATE SET NBC.NOTEBOOK_DATA = NBC_TMP.NOTEBOOK_DATA ")
+            .append(" WHEN NOT MATCHED THEN ")
+            .append(" INSERT (NOTEBOOK_ID, NOTEBOOK_DATA) ")
+            .append(" VALUES (NBC_TMP.NOTEBOOK_ID, NBC_TMP.NOTEBOOK_DATA) ")
+            .append(" ELSE IGNORE").toString();
 
     try {
-      ps = con.prepareStatement(checkQuery);
+      ps = con.prepareStatement(mergeQuery);
       ps.setString(1, note.getId());
-      ResultSet rset =  ps.executeQuery();
-
-      if (rset.next()) {
-        ps = con.prepareStatement(updateQuery);
-        ps.setString(1, json);
-        ps.setString(2, note.getId());
-        logger.info(updateQuery);
-        if (ps.executeUpdate() == 1) {
-          logger.info("update successfully");
-        }
-
-      } else {
-
-        ps = con.prepareStatement(insertQuery);
-        logger.info(insertQuery);
-
-        ps.setString(1, note.getId());
-        ps.setString(2, json);
-        if (ps.executeUpdate() == 1) {
-          logger.info("saved successfully");
-        }
+      ps.setString(2, json);
+      if (ps.executeUpdate() == 1) {
+        logger.info(" Record merged successfully for Notebookd Id: " + note.getId());
       }
 
     } catch (SQLException sqle) {
