@@ -33,6 +33,11 @@ public class DBNotebookRepo implements NotebookRepo {
   private Connection con = null;
 
   public DBNotebookRepo(ZeppelinConfiguration conf) {
+    connectToDB();
+  }
+
+  private void connectToDB() {
+
     try {
       logger.info("Connecting to Database !!");
       Class.forName(DRIVER);
@@ -47,13 +52,39 @@ public class DBNotebookRepo implements NotebookRepo {
       e.printStackTrace();
     }
     catch (SQLException sqle)  {
-      logger.error("EXIT: SQLException getConnection, Message:" +
+      logger.error("EXIT: SQLException Initial Connect, Message:" +
               sqle.getMessage() + " - " + sqle.getErrorCode());
     }
+
+  }
+
+  private boolean checkDBConnection() {
+
+    String query = "VALUES 1";
+    try {
+      PreparedStatement ps = con.prepareStatement(query);
+      if (ps.execute()) {
+        logger.info(" DB connection is alive");
+        return true;
+      } else {
+        return false;
+      }
+
+    } catch (SQLException sqle) {
+      logger.error("EXIT: SQLException Initial Connect, Message:" +
+              sqle.getMessage() + " - " + sqle.getErrorCode());
+      return false;
+    }
+
   }
 
   @Override
   public List<NoteInfo> list() throws IOException {
+
+    boolean alive = checkDBConnection();
+    if (!alive) {
+      connectToDB();
+    }
 
     logger.info("Entered list call");
     List<NoteInfo> infos = new LinkedList<NoteInfo>();
@@ -75,7 +106,7 @@ public class DBNotebookRepo implements NotebookRepo {
       }
 
     } catch (SQLException sqle) {
-      logger.error("EXIT: SQLException getConnection, Message:" +
+      logger.error("EXIT: SQLException getConnection list() call, Message:" +
               sqle.getMessage() + " - " + sqle.getErrorCode());
       sqle.printStackTrace();
     }
@@ -88,6 +119,10 @@ public class DBNotebookRepo implements NotebookRepo {
   public Note get(String noteId) throws IOException {
 
     logger.info("Entered get call " + noteId);
+    boolean alive = checkDBConnection();
+    if (!alive) {
+      connectToDB();
+    }
     return getNote(noteId);
 
   }
@@ -126,7 +161,7 @@ public class DBNotebookRepo implements NotebookRepo {
       }
       logger.info("left getNote");
     } catch (SQLException sqle) {
-      logger.error("EXIT: SQLException getConnection, Message:" +
+      logger.error("EXIT: SQLException getConnection getNote() call, Message:" +
               sqle.getMessage() + " - " + sqle.getErrorCode());
       sqle.printStackTrace();
     }
@@ -143,6 +178,11 @@ public class DBNotebookRepo implements NotebookRepo {
     String json = gson.toJson(note);
     PreparedStatement ps;
     sb = new StringBuilder();
+
+    boolean alive = checkDBConnection();
+    if (!alive) {
+      connectToDB();
+    }
 
     String mergeQuery = sb.append("MERGE INTO ")
             .append(DB_SCHEMA)
@@ -165,7 +205,7 @@ public class DBNotebookRepo implements NotebookRepo {
       }
 
     } catch (SQLException sqle) {
-      logger.error("EXIT: SQLException getConnection, Message:" +
+      logger.error("EXIT: SQLException getConnection save() call, Message:" +
               sqle.getMessage() + " - " + sqle.getErrorCode());
       sqle.printStackTrace();
     }
@@ -175,6 +215,11 @@ public class DBNotebookRepo implements NotebookRepo {
 
   @Override
   public void remove(String noteId) throws IOException {
+
+    boolean alive = checkDBConnection();
+    if (!alive) {
+      connectToDB();
+    }
 
     PreparedStatement ps;
 
@@ -188,7 +233,7 @@ public class DBNotebookRepo implements NotebookRepo {
       }
 
     } catch (SQLException sqle) {
-      logger.error("EXIT: SQLException getConnection, Message:" +
+      logger.error("EXIT: SQLException getConnection remove() call, Message:" +
               sqle.getMessage() + " - " + sqle.getErrorCode());
       sqle.printStackTrace();
     }
